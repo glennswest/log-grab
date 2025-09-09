@@ -9,8 +9,11 @@ A Python script that monitors an OpenShift project for pod failures and automati
 - **Automatic log extraction**: Saves logs from all containers in failed pods
 - **Timestamped files**: Creates uniquely named log files with timestamps
 - **Robust error handling**: Handles API errors and network issues gracefully
+- **Authentication resilience**: Automatic token refresh and retry logic for 401 errors
+- **Watch stream reconnection**: Automatically reconnects on authentication failures
 - **Configurable**: Supports environment variables and command-line arguments
 - **Multi-container support**: Extracts logs from all containers in a pod
+- **Virtual environment support**: Isolated dependency management
 
 ## Prerequisites
 
@@ -20,8 +23,26 @@ A Python script that monitors an OpenShift project for pod failures and automati
 
 ## Installation
 
+### Quick Setup (Recommended)
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd log-grab
+
+# Run the setup script (installs tkinter + creates virtual environment)
+./setup_tkinter.sh
+```
+
+### Manual Setup
+
 1. Clone or download this repository
-2. Install dependencies:
+2. Create and activate virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -33,6 +54,12 @@ A Python script that monitors an OpenShift project for pod failures and automati
 Monitor a specific OpenShift project:
 
 ```bash
+# Using virtual environment (recommended)
+source venv/bin/activate
+python pod_log_watcher.py my-project-name
+
+# Or use the activation helper
+source activate_venv.sh
 python pod_log_watcher.py my-project-name
 ```
 
@@ -130,13 +157,36 @@ The script maintains its own log file (`watcher.log`) in the log directory, cont
 - Error messages and warnings
 - Processing statistics
 
+## Authentication & Reliability
+
+### Automatic Token Refresh
+
+The pod watcher includes robust authentication handling:
+
+- **Automatic token refresh**: Refreshes Kubernetes tokens every hour
+- **401 error recovery**: Automatically refreshes tokens on authentication failures
+- **Retry logic**: Exponential backoff for transient errors (429, 500, 502, 503, 504)
+- **Watch stream reconnection**: Automatically reconnects the watch stream on failures
+- **Configurable timeouts**: 5-minute watch timeouts with automatic reconnection
+
+### Error Handling
+
+The watcher handles various error scenarios:
+
+- **Authentication failures (401)**: Force token refresh and retry
+- **Rate limiting (429)**: Exponential backoff retry
+- **Server errors (5xx)**: Automatic retry with backoff
+- **Network timeouts**: Automatic reconnection
+- **Watch stream interruptions**: Seamless reconnection
+
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Authentication errors**: Ensure your kubeconfig is valid and you have access to the namespace
+1. **Authentication errors**: The watcher now automatically handles token expiration and refreshes authentication
 2. **Permission denied**: Verify you have read access to pods and logs in the target namespace
-3. **Network timeouts**: The script will retry and continue watching after temporary network issues
+3. **Network timeouts**: The script automatically retries and reconnects after network issues
+4. **Long-running sessions**: Token refresh ensures the watcher can run indefinitely
 
 ### Debug Mode
 

@@ -15,24 +15,43 @@ Features:
 
 import os
 import sys
+
+# Set environment variables to suppress urllib3 warnings
+os.environ['PYTHONWARNINGS'] = 'ignore'
+os.environ['URLLIB3_DISABLE_WARNINGS'] = '1'
+
+# Suppress all warnings at the Python level
+import warnings
+warnings.simplefilter("ignore")
+
+# Import and configure urllib3 warning suppression
+import urllib3
+urllib3.disable_warnings()
+
+# Additional specific warning filters
+warnings.filterwarnings("ignore", category=urllib3.exceptions.InsecureRequestWarning)
+warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="urllib3")
+warnings.filterwarnings("ignore", message=".*urllib3.*")
+warnings.filterwarnings("ignore", message=".*OpenSSL.*")
+warnings.filterwarnings("ignore", message=".*LibreSSL.*")
+warnings.filterwarnings("ignore", message=".*ssl.*")
+
+# Monkey patch warnings.warn to catch any remaining warnings
+original_warn = warnings.warn
+def patched_warn(message, category=UserWarning, filename='', lineno=-1, file=None, stacklevel=1):
+    # Suppress urllib3 and SSL related warnings
+    if isinstance(message, str) and any(keyword in message.lower() for keyword in ['urllib3', 'openssl', 'libressl', 'ssl']):
+        return
+    # Call original warn for other warnings
+    original_warn(message, category, filename, lineno, file, stacklevel)
+warnings.warn = patched_warn
+
 import argparse
 import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
-
-# Suppress SSL and urllib3 warnings
-import urllib3
-import warnings
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning)
-# Suppress all urllib3 warnings including OpenSSL version warnings
-urllib3.disable_warnings()
-# Suppress specific LibreSSL/OpenSSL version warnings
-warnings.filterwarnings("ignore", message=".*urllib3 v2 only supports OpenSSL 1.1.1+.*", category=UserWarning)
-warnings.filterwarnings("ignore", message=".*LibreSSL.*", category=UserWarning)
-# Also suppress any remaining urllib3 warnings via the warnings module
-warnings.filterwarnings("ignore", message=".*urllib3.*", category=UserWarning)
 
 try:
     from kubernetes import client, config, watch

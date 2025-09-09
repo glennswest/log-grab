@@ -99,24 +99,34 @@ def launch_watcher(script_dir: Path, args):
 
 def launch_gui(script_dir: Path, args):
     """Launch the GUI viewer."""
-    # Try to use the best available Python with tkinter
-    python_candidates = [
-        "/opt/homebrew/bin/python3",  # Homebrew Python (macOS)
-        "/usr/local/bin/python3",     # Alternative location
-        sys.executable                # Current Python
-    ]
+    # Check if we have a virtual environment
+    venv_python = script_dir / 'venv' / 'bin' / 'python'
     
-    python_cmd = sys.executable
-    for candidate in python_candidates:
-        try:
-            import subprocess
-            result = subprocess.run([candidate, "-c", "import tkinter"], 
-                                  capture_output=True, timeout=5)
-            if result.returncode == 0:
-                python_cmd = candidate
-                break
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            continue
+    if venv_python.exists():
+        # Use virtual environment Python
+        python_cmd = str(venv_python)
+        print(f"Using virtual environment Python: {python_cmd}")
+    else:
+        # Fallback to system Python detection
+        python_candidates = [
+            "/opt/homebrew/bin/python3",  # Homebrew Python (macOS)
+            "/usr/local/bin/python3",     # Alternative location
+            sys.executable                # Current Python
+        ]
+        
+        python_cmd = sys.executable
+        for candidate in python_candidates:
+            try:
+                import subprocess
+                result = subprocess.run([candidate, "-c", "import tkinter"], 
+                                      capture_output=True, timeout=5)
+                if result.returncode == 0:
+                    python_cmd = candidate
+                    break
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                continue
+        
+        print(f"Using system Python: {python_cmd}")
     
     cmd = [python_cmd, str(script_dir / 'log_viewer_gui.py')]
     

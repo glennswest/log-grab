@@ -164,9 +164,34 @@ echo "🧪 Testing installation..."
 test_tkinter
 
 echo ""
-echo "🎉 Setup complete! You can now run the GUI:"
-echo "   python3 log_viewer_gui.py --log-dir ./pod_logs"
+echo "📦 Creating virtual environment..."
+python3 -m venv venv
+
+echo "🔧 Activating virtual environment and installing dependencies..."
+source venv/bin/activate
+pip install -r requirements.txt
+
+echo "🧪 Testing virtual environment..."
+python -c "
+import tkinter as tk
+print(f'✅ Virtual environment ready!')
+print(f'   Python: $(python --version)')
+print(f'   Tkinter: Tk {tk.TkVersion}, Tcl {tk.TclVersion}')
+"
+
+deactivate
+
 echo ""
-echo "💡 Tips:"
-echo "   - Use 'python3 launcher.py gui' for easy launching"
-echo "   - Use 'python3 launcher.py both <namespace>' to run watcher + GUI"
+echo "🎉 Setup complete! You can now run the GUI:"
+echo ""
+echo "Option 1 - Use the launcher script (recommended):"
+echo "   ./run_gui.sh --log-dir ./pod_logs"
+echo ""
+echo "Option 2 - Activate virtual environment manually:"
+echo "   source activate_venv.sh"
+echo "   python log_viewer_gui.py --log-dir ./pod_logs"
+echo ""
+echo "Option 3 - Use the launcher utility:"
+echo "   python3 launcher.py gui --log-dir ./pod_logs"
+echo ""
+echo "💡 The virtual environment ensures consistent dependencies!"

@@ -28,6 +28,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning)
 # Suppress all urllib3 warnings including OpenSSL version warnings
 urllib3.disable_warnings()
+# Suppress specific LibreSSL/OpenSSL version warnings
+warnings.filterwarnings("ignore", message=".*urllib3 v2 only supports OpenSSL 1.1.1+.*", category=UserWarning)
+warnings.filterwarnings("ignore", message=".*LibreSSL.*", category=UserWarning)
 # Also suppress any remaining urllib3 warnings via the warnings module
 warnings.filterwarnings("ignore", message=".*urllib3.*", category=UserWarning)
 

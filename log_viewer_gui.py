@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 OpenShift Pod Log Viewer GUI
@@ -16,8 +17,6 @@ Features:
 
 import os
 import sys
-import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
 import threading
 import time
 from datetime import datetime
@@ -25,6 +24,18 @@ from pathlib import Path
 import re
 from typing import Dict, List, Optional, Tuple
 import json
+
+try:
+    import tkinter as tk
+    from tkinter import ttk, messagebox, filedialog
+except ImportError as e:
+    print("Error: tkinter is not available. The GUI requires tkinter to run.")
+    print("\nTo install tkinter:")
+    print("- On Ubuntu/Debian: sudo apt-get install python3-tk")
+    print("- On macOS with Homebrew: brew install python-tk")
+    print("- On Windows: tkinter is usually included with Python")
+    print("\nAlternatively, use the command-line pod watcher: python pod_log_watcher.py <namespace>")
+    sys.exit(1)
 
 
 class LogViewerGUI:
@@ -73,8 +84,7 @@ class LogViewerGUI:
         # Configure button styles
         style.configure("Action.TButton", font=('Arial', 9))
         
-        # Configure treeview tags for watcher logs
-        self.root.after(100, self.setup_tree_tags)
+        # We'll setup tree tags after the tree is created
     
     def setup_tree_tags(self):
         """Setup treeview tags for different log types."""
@@ -162,6 +172,9 @@ class LogViewerGUI:
         
         tree_container.grid_rowconfigure(0, weight=1)
         tree_container.grid_columnconfigure(0, weight=1)
+        
+        # Setup tree tags now that the tree is created
+        self.setup_tree_tags()
         
         # Filter frame
         filter_frame = ttk.LabelFrame(parent, text="Filter", padding=5)

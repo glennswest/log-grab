@@ -1,1 +1,7 @@
 kubernetes>=28.1.0
+
+# Note: tkinter is required for the GUI but is usually included with Python
+# If you get "ModuleNotFoundError: No module named '_tkinter'", install it with:
+# - On Ubuntu/Debian: sudo apt-get install python3-tk
+# - On macOS with Homebrew: brew install python-tk
+# - On Windows: tkinter is usually included with Python

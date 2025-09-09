@@ -230,6 +230,16 @@ python log_viewer_gui.py
 python log_viewer_gui.py --log-dir /path/to/logs
 ```
 
+### Prerequisites for GUI
+
+The GUI requires tkinter, which is usually included with Python. If you get a "ModuleNotFoundError: No module named '_tkinter'" error:
+
+- **Ubuntu/Debian**: `sudo apt-get install python3-tk`
+- **macOS with Homebrew**: `brew install python-tk`  
+- **Windows**: tkinter is usually included with Python
+
+If tkinter is not available, you can still use the command-line pod watcher.
+
 ### GUI Controls
 
 - **🔄 Refresh**: Manually refresh the log file list

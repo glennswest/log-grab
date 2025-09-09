@@ -1,4 +1,7 @@
 
+
+
+
 #!/usr/bin/env python3
 """
 OpenShift Pod Log Viewer GUI

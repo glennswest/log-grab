@@ -1,7 +1,17 @@
 kubernetes>=28.1.0
 
-# Note: tkinter is required for the GUI but is usually included with Python
-# If you get "ModuleNotFoundError: No module named '_tkinter'", install it with:
-# - On Ubuntu/Debian: sudo apt-get install python3-tk
-# - On macOS with Homebrew: brew install python-tk
-# - On Windows: tkinter is usually included with Python
+# GUI Requirements:
+# tkinter is required for the GUI and should include Tcl/Tk 8.6+ (preferably 9.0.2+)
+#
+# Quick Setup:
+# Run: ./setup_tkinter.sh
+#
+# Manual Installation:
+# - macOS: brew install tcl-tk && brew install python-tk
+# - Ubuntu/Debian: sudo apt-get install python3-tk tk-dev tcl-dev
+# - Windows: tkinter usually included with Python from python.org
+#
+# For Tcl/Tk 9.0.2 specifically:
+# - macOS: Use Homebrew (automatically gets latest version)
+# - Linux: May need to compile from source or use newer distro
+# - Windows: Download Python 3.11+ from python.org

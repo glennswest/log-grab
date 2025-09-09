@@ -28,12 +28,37 @@ import json
 try:
     import tkinter as tk
     from tkinter import ttk, messagebox, filedialog
+    
+    # Check tkinter version and provide compatibility
+    tk_version = tk.TkVersion
+    tcl_version = tk.TclVersion
+    print(f"Using Tk version: {tk_version}, Tcl version: {tcl_version}")
+    
+    # Ensure we have a modern enough version
+    if tk_version < 8.6:
+        print(f"Warning: Tk version {tk_version} is quite old. Consider upgrading to Tk 8.6+ or 9.0+ for better performance.")
+    
 except ImportError as e:
     print("Error: tkinter is not available. The GUI requires tkinter to run.")
-    print("\nTo install tkinter:")
-    print("- On Ubuntu/Debian: sudo apt-get install python3-tk")
-    print("- On macOS with Homebrew: brew install python-tk")
-    print("- On Windows: tkinter is usually included with Python")
+    print(f"Import error: {e}")
+    print("\nTo install tkinter with Tcl/Tk 9.0.2 support:")
+    print("\n=== macOS ===")
+    print("Option 1 - Using Homebrew (recommended):")
+    print("  brew install python-tk")
+    print("  # This will install the latest Tcl/Tk version")
+    print("\nOption 2 - Install Python with tkinter support:")
+    print("  brew install python@3.11 --with-tcl-tk")
+    print("\nOption 3 - Use pyenv with tkinter:")
+    print("  brew install tcl-tk")
+    print("  export PATH=\"/opt/homebrew/opt/tcl-tk/bin:$PATH\"")
+    print("  export LDFLAGS=\"-L/opt/homebrew/opt/tcl-tk/lib\"")
+    print("  export CPPFLAGS=\"-I/opt/homebrew/opt/tcl-tk/include\"")
+    print("  pyenv install 3.11.0")
+    print("\n=== Ubuntu/Debian ===")
+    print("  sudo apt-get update")
+    print("  sudo apt-get install python3-tk tk-dev tcl-dev")
+    print("\n=== Windows ===")
+    print("  tkinter is usually included with Python from python.org")
     print("\nAlternatively, use the command-line pod watcher: python pod_log_watcher.py <namespace>")
     sys.exit(1)
 
@@ -61,6 +86,28 @@ class LogViewerGUI:
         self.root.geometry("1400x900")
         self.root.minsize(800, 600)
         
+        # Configure for modern Tcl/Tk versions
+        try:
+            # Enable high DPI support (Tk 8.6.10+)
+            self.root.tk.call('tk', 'scaling', 1.0)
+            
+            # Use native appearance on macOS (Tk 8.6.10+)
+            if sys.platform == "darwin":
+                try:
+                    self.root.tk.call("::tk::unsupported::MacWindowStyle", "style", self.root._w, "document", "closeBox collapseBox resizable")
+                except tk.TclError:
+                    pass  # Ignore if not supported
+            
+            # Enable smooth scrolling (Tk 9.0+)
+            try:
+                self.root.tk.call('tk', 'windowingsystem')  # Test if advanced features available
+            except tk.TclError:
+                pass
+                
+        except (tk.TclError, AttributeError):
+            # Fallback for older Tk versions
+            pass
+        
         # Configure styles
         self.setup_styles()
         
@@ -74,15 +121,70 @@ class LogViewerGUI:
         self.bind_events()
     
     def setup_styles(self):
-        """Configure ttk styles for better appearance."""
+        """Configure ttk styles for better appearance with modern Tcl/Tk."""
         style = ttk.Style()
         
-        # Configure treeview style
-        style.configure("Treeview", rowheight=25)
-        style.configure("Treeview.Heading", font=('Arial', 10, 'bold'))
+        # Try to use modern themes (Tk 8.6+)
+        available_themes = style.theme_names()
+        print(f"Available themes: {available_themes}")
         
-        # Configure button styles
-        style.configure("Action.TButton", font=('Arial', 9))
+        # Choose the best available theme
+        preferred_themes = ['aqua', 'vista', 'xpnative', 'winnative', 'clam', 'alt', 'default']
+        selected_theme = 'default'
+        
+        for theme in preferred_themes:
+            if theme in available_themes:
+                selected_theme = theme
+                break
+        
+        try:
+            style.theme_use(selected_theme)
+            print(f"Using theme: {selected_theme}")
+        except tk.TclError:
+            print(f"Failed to set theme {selected_theme}, using default")
+        
+        # Configure treeview style with modern enhancements
+        style.configure("Treeview", 
+                       rowheight=28,  # Slightly taller for better readability
+                       fieldbackground="#2d3748",
+                       background="#2d3748",
+                       foreground="#e2e8f0",
+                       borderwidth=0,
+                       relief="flat")
+        
+        style.configure("Treeview.Heading", 
+                       font=('SF Pro Display', 11, 'bold') if sys.platform == "darwin" else ('Segoe UI', 10, 'bold'),
+                       background="#4a5568",
+                       foreground="#f7fafc",
+                       borderwidth=1,
+                       relief="flat")
+        
+        # Configure button styles with modern appearance
+        style.configure("Action.TButton", 
+                       font=('SF Pro Display', 9) if sys.platform == "darwin" else ('Segoe UI', 9),
+                       padding=(8, 4),
+                       borderwidth=1,
+                       focuscolor="none")
+        
+        # Configure modern scrollbar (Tk 8.6+)
+        try:
+            style.configure("Vertical.TScrollbar",
+                           background="#4a5568",
+                           troughcolor="#2d3748",
+                           borderwidth=0,
+                           arrowcolor="#e2e8f0",
+                           darkcolor="#4a5568",
+                           lightcolor="#4a5568")
+            
+            style.configure("Horizontal.TScrollbar",
+                           background="#4a5568",
+                           troughcolor="#2d3748",
+                           borderwidth=0,
+                           arrowcolor="#e2e8f0",
+                           darkcolor="#4a5568",
+                           lightcolor="#4a5568")
+        except tk.TclError:
+            pass  # Fallback for older versions
         
         # We'll setup tree tags after the tree is created
     
@@ -182,7 +284,14 @@ class LogViewerGUI:
         
         ttk.Label(filter_frame, text="Pod name:").pack(anchor=tk.W)
         self.filter_var = tk.StringVar()
-        self.filter_var.trace('w', self.on_filter_change)
+        
+        # Use modern trace method for Tcl/Tk 9.0+, fallback for older versions
+        try:
+            self.filter_var.trace_add('write', self.on_filter_change)
+        except AttributeError:
+            # Fallback for older tkinter versions
+            self.filter_var.trace('w', self.on_filter_change)
+        
         filter_entry = ttk.Entry(filter_frame, textvariable=self.filter_var)
         filter_entry.pack(fill=tk.X, pady=(2, 0))
     
@@ -225,16 +334,38 @@ class LogViewerGUI:
         content_frame = ttk.Frame(parent)
         content_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # Create text widget with scrollbars
+        # Create text widget with scrollbars and modern features
+        # Choose appropriate monospace font based on platform
+        if sys.platform == "darwin":
+            mono_font = ('SF Mono', 11)
+        elif sys.platform == "win32":
+            mono_font = ('Consolas', 10)
+        else:
+            mono_font = ('DejaVu Sans Mono', 10)
+        
         self.log_text = tk.Text(
             content_frame,
             wrap=tk.NONE,
-            font=('Consolas', 10),
-            bg='#1e1e1e',
-            fg='#d4d4d4',
-            insertbackground='white',
-            selectbackground='#264f78'
+            font=mono_font,
+            bg='#1a202c',
+            fg='#e2e8f0',
+            insertbackground='#63b3ed',
+            selectbackground='#2d3748',
+            selectforeground='#f7fafc',
+            borderwidth=0,
+            highlightthickness=0,
+            padx=10,
+            pady=8,
+            spacing1=2,  # Extra space above lines
+            spacing3=2,  # Extra space below lines
+            relief='flat'
         )
+        
+        # Enable smooth scrolling for Tk 9.0+
+        try:
+            self.log_text.configure(smoothscroll=True)
+        except tk.TclError:
+            pass  # Not available in older versions
         
         # Scrollbars for text widget
         text_v_scroll = ttk.Scrollbar(content_frame, orient=tk.VERTICAL, command=self.log_text.yview)
@@ -619,6 +750,7 @@ class LogViewerGUI:
     
     def on_filter_change(self, *args):
         """Handle filter text changes."""
+        # Handle both old and new trace callback signatures
         filter_text = self.filter_var.get().lower()
         
         # Show/hide tree items based on filter

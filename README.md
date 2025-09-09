@@ -232,11 +232,38 @@ python log_viewer_gui.py --log-dir /path/to/logs
 
 ### Prerequisites for GUI
 
-The GUI requires tkinter, which is usually included with Python. If you get a "ModuleNotFoundError: No module named '_tkinter'" error:
+The GUI requires tkinter with Tcl/Tk 8.6+ (preferably 9.0.2+ for best performance and modern features).
 
-- **Ubuntu/Debian**: `sudo apt-get install python3-tk`
-- **macOS with Homebrew**: `brew install python-tk`  
-- **Windows**: tkinter is usually included with Python
+#### Quick Setup
+```bash
+# Run the automated setup script
+./setup_tkinter.sh
+```
+
+#### Manual Installation
+
+If you get a "ModuleNotFoundError: No module named '_tkinter'" error:
+
+**macOS (Recommended - gets Tcl/Tk 9.0.2+):**
+```bash
+brew install tcl-tk
+brew install python-tk
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install python3-tk tk-dev tcl-dev
+```
+
+**Windows:**
+- Download Python from python.org (includes tkinter)
+- Ensure "tcl/tk and IDLE" is checked during installation
+
+#### Tcl/Tk Version Features
+- **Tcl/Tk 9.0.2+**: Full modern features, smooth scrolling, enhanced performance
+- **Tcl/Tk 8.6+**: Good compatibility, most features available  
+- **Tcl/Tk 8.5 and older**: Basic functionality only
 
 If tkinter is not available, you can still use the command-line pod watcher.
 

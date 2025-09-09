@@ -21,10 +21,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-# Suppress SSL warnings from urllib3
+# Suppress SSL and urllib3 warnings
 import urllib3
+import warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning)
+# Suppress all urllib3 warnings including OpenSSL version warnings
+urllib3.disable_warnings()
+# Also suppress any remaining urllib3 warnings via the warnings module
+warnings.filterwarnings("ignore", message=".*urllib3.*", category=UserWarning)
 
 try:
     from kubernetes import client, config, watch

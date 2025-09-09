@@ -204,6 +204,50 @@ export POD_LOG_DIR=./logs
 python pod_log_watcher.py my-development-project --verbose
 ```
 
+## GUI Log Viewer
+
+A Tkinter-based graphical user interface is also provided for easy navigation and viewing of collected pod logs.
+
+### Features
+
+- **Project/Pod Navigation**: Browse logs organized by pod name
+- **Multiple Log Files**: View multiple log files per pod with timestamps
+- **Watcher Log Integration**: View the Pod Log Watcher's own log file with special highlighting
+- **Syntax Highlighting**: Color-coded log levels (ERROR, WARN, INFO, DEBUG)
+- **Enhanced Watcher Log Display**: Special colors and formatting for watcher log entries
+- **Search Functionality**: Search within log files with navigation
+- **Real-time Refresh**: Auto-refresh capability to see new logs
+- **Filtering**: Filter pods by name
+- **Dark Theme**: Easy-to-read dark color scheme
+
+### Usage
+
+```bash
+# Launch the GUI with default log directory
+python log_viewer_gui.py
+
+# Specify custom log directory
+python log_viewer_gui.py --log-dir /path/to/logs
+```
+
+### GUI Controls
+
+- **🔄 Refresh**: Manually refresh the log file list
+- **Auto-refresh**: Automatically refresh every 5 seconds
+- **📁 Change Directory**: Select a different log directory
+- **Search**: Use Ctrl+F or the search box to find text in logs
+- **Filter**: Filter pods by name in the left panel
+
+### Screenshots
+
+The GUI provides:
+- Left panel: Tree view of pods and their log files, with Pod Log Watcher at the top
+- Right panel: Log content viewer with syntax highlighting
+- Special watcher log highlighting with distinct colors for different log levels
+- Search functionality with result navigation
+- Auto-scroll to bottom for watcher logs (to see recent activity)
+- Status bar showing current directory and file information
+
 ## License
 
 This project is provided as-is for educational and operational purposes.

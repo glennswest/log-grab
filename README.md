@@ -223,11 +223,14 @@ A Tkinter-based graphical user interface is also provided for easy navigation an
 ### Usage
 
 ```bash
-# Launch the GUI with default log directory
-python log_viewer_gui.py
+# Recommended: Use the launcher script (automatically finds correct Python)
+./run_gui.sh --log-dir ./pod_logs
 
-# Specify custom log directory
-python log_viewer_gui.py --log-dir /path/to/logs
+# Alternative: Use the launcher utility
+python3 launcher.py gui --log-dir ./pod_logs
+
+# Direct usage (if you have the correct Python setup)
+python3 log_viewer_gui.py --log-dir /path/to/logs
 ```
 
 ### Prerequisites for GUI
@@ -266,6 +269,45 @@ sudo apt-get install python3-tk tk-dev tcl-dev
 - **Tcl/Tk 8.5 and older**: Basic functionality only
 
 If tkinter is not available, you can still use the command-line pod watcher.
+
+#### Troubleshooting GUI Issues
+
+**Problem: "ModuleNotFoundError: No module named '_tkinter'"**
+
+This means your Python installation doesn't have tkinter support. Solutions:
+
+1. **Use the launcher script** (recommended):
+   ```bash
+   ./run_gui.sh --log-dir ./pod_logs
+   ```
+   This automatically finds a Python installation with tkinter support.
+
+2. **Run the setup script**:
+   ```bash
+   ./setup_tkinter.sh
+   ```
+
+3. **Check your Python installation**:
+   ```bash
+   # Test if tkinter works
+   python3 -c "import tkinter as tk; print(f'Tk: {tk.TkVersion}')"
+   
+   # If that fails, try Homebrew Python (macOS)
+   /opt/homebrew/bin/python3 -c "import tkinter as tk; print(f'Tk: {tk.TkVersion}')"
+   ```
+
+4. **Set your PATH** to use Homebrew Python (macOS):
+   ```bash
+   export PATH="/opt/homebrew/bin:$PATH"
+   echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+   ```
+
+**Problem: GUI uses old Tk version**
+
+Make sure you're using the correct Python installation:
+- macOS: Use Homebrew Python (`/opt/homebrew/bin/python3`)
+- Linux: Install `python3-tk` package
+- Windows: Use Python from python.org
 
 ### GUI Controls
 

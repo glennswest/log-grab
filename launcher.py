@@ -99,7 +99,26 @@ def launch_watcher(script_dir: Path, args):
 
 def launch_gui(script_dir: Path, args):
     """Launch the GUI viewer."""
-    cmd = [sys.executable, str(script_dir / 'log_viewer_gui.py')]
+    # Try to use the best available Python with tkinter
+    python_candidates = [
+        "/opt/homebrew/bin/python3",  # Homebrew Python (macOS)
+        "/usr/local/bin/python3",     # Alternative location
+        sys.executable                # Current Python
+    ]
+    
+    python_cmd = sys.executable
+    for candidate in python_candidates:
+        try:
+            import subprocess
+            result = subprocess.run([candidate, "-c", "import tkinter"], 
+                                  capture_output=True, timeout=5)
+            if result.returncode == 0:
+                python_cmd = candidate
+                break
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            continue
+    
+    cmd = [python_cmd, str(script_dir / 'log_viewer_gui.py')]
     
     if args.log_dir != './pod_logs':
         cmd.extend(['--log-dir', args.log_dir])
